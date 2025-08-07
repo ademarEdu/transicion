@@ -32,5 +32,4 @@ def run_algorithm(n, sp3_atoms_list, sp2_atoms_list, difvecatomslist):
         partialgeom = np.array(partialgeom)
         partialgeoms.append(partialgeom)
 
-    print(np.array(partialgeoms))
     return np.array(partialgeoms)

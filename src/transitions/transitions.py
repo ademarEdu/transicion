@@ -5,8 +5,9 @@ import transitions.utilities as utils
 # Para más información sobre qué representan estos datos, consulta el archivo README.md
 
 # Rutas de los archivos que contienen las coordenadas de los átomos de las moléculas
-sp3_path = "molecules\LI-7\sp2-coordinates.txt"
-sp2_path = "molecules\LI-7\sp3-coordinates.txt"
+sp3_path = "molecules/LI-7/sp2-coordinates.txt"
+sp2_path = "molecules/LI-7/sp3-coordinates.txt"
+template_file_path = "molecules/LI-7/template.txt"
 
 # Este es el átomo que se llevará a la coordenada [0, 0, 0]
 origin_atom_index = 11 # Editar este valor para cambiar el átomo que se llevará al origen
@@ -56,4 +57,4 @@ def get_transitions():
     # ----------------------------------------------
     # Paso 4. Generar archivos .gjf (opcional)
     if gjf:
-        utils.generate_gjf(transitions, n_transitions, len(sp3_atoms_list), "molecules/LI-7/template.txt")
+        utils.generate_gjf(transitions, n_transitions, len(sp3_atoms_list), template_file_path)
