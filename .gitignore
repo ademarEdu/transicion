@@ -1,3 +1,5 @@
 __pycache__/
 venv/*
-molecules/*
+molecules/*/gjf_files/*
+notebooks/*
+src/cli/*
