@@ -17,70 +17,43 @@ class Molecule:
         self.number_atoms = len(atoms_list)
         self.atoms = {i:atom for i, atom in zip(range(1, self.number_atoms+1), atoms_list)}
 
-class TriCationicMolecule:
-    def __init__(self, origin_atom_index,central_atoms_indexes, c_cation_indexes, l_cation_indexes, r_cation_indexes, l_bridge_indexes, r_bridge_indexes, sp3_coords, sp2_coords):
+class TriCationicMolecule(Molecule):
+    def __init__(
+            self,
+            name,
+            atoms_list,
+            origin_atom_index,
+            central_atoms_indexes
+        ):
         """
         Initialize an aligned TriCationicMolecule in both states sp3 and sp2.
         
         Args:
             origin_atom_index (int): Index of the atom that will be moved to the origin [0, 0, 0].
-
             central_atoms_indexes (list): Contains the coordinates of top atom of the central cation and the right adjacent atom.
-
-            c_cation_indexes (list): List of indexes of the central cation atoms.
-
-            l_cation_indexes (list): List of indexes of the left cation atoms.
-
-            r_cation_indexes (list): List of indexes of the right cation atoms.
-            
-            l_bridge_indexes (list): List of indexes of the left bridge atoms.
-
-            r_bridge_indexes (list): List of indexes of the right bridge atoms.
-
-            sp3_coords (list): List of arrays containing the coordinates of the atoms in the sp3 state.
-
-            sp2_coords (list): List of arrays containing the coordinates of the atoms in the sp2 state.
         """
+        super().__init__(name, atoms_list)
         # Inicializar atributos posibles (independientes)
-        self.number_atoms = len(sp3_coords)
         # Átomo que se llevará a la coordenada [0, 0, 0]
-        origin_atom = sp3_coords[origin_atom_index]
+        origin_atom = self.atoms[origin_atom_index]
 
         # Llevar el origin_atom a las coordenadas [0, 0, 0]
-        for i in range(self.number_atoms):
-            sp3_coords[i] = sp3_coords[i]-origin_atom
-            sp2_coords[i] = sp2_coords[i]-origin_atom
+        for i in range(1, self.number_atoms+1):
+            self.atoms[i] = self.atoms[i] - origin_atom
 
-        # Encontrar las matrices de alineaminto del estado sp3 y sp2
-        a_sp3 = self.get_alignment_matrix(sp3_coords[central_atoms_indexes[0]], sp3_coords[central_atoms_indexes[1]])
-        a_sp2 = self.get_alignment_matrix(sp2_coords[central_atoms_indexes[0]], sp2_coords[central_atoms_indexes[1]])
+        # Encontrar la matriz de alineamiento
+        a = self.get_alignment_matrix(self.atoms[central_atoms_indexes[0]], self.atoms[central_atoms_indexes[1]])
 
-        # Alinear coordenadas de los estados sp3 y sp2 a plano xy
-        for i in range(self.number_atoms):
-            sp3_coords[i] = np.dot(a_sp3, sp3_coords[i])
-            sp2_coords[i] = np.dot(a_sp2, sp2_coords[i])
+        # Alinear coordenadas al plano xy
+        for i in range(1, self.number_atoms+1):
+            self.atoms[i] = np.dot(a, self.atoms[i])
 
-        self.sp3 = sp3_coords
-
-        # Inicializar los atributos que contienen las coordenadas alineadas       
-        self.central_cation = {i: sp3_coords[i] for i in central_atoms_indexes}
-
-        self.left_cation = {i: sp3_coords[i] for i in l_cation_indexes}
-
-        self.right_cation = {i: sp3_coords[i] for i in r_cation_indexes}
-
-        self.left_bridge = {i: sp3_coords[i] for i in l_bridge_indexes}
-
-        self.right_bridge = {i: sp3_coords[i] for i in r_bridge_indexes}
-
-        # Inicializar los atributos que contienen las diferencias entre los vectores de sp3 y sp2
-        self.l_cation_differences = {i: (sp2_coords[i] - sp3_coords[i]) for i in central_atoms_indexes}
-
-        self.r_cation_differences = {i: (sp2_coords[i] - sp3_coords[i]) for i in r_cation_indexes}
-
-        self.l_bridge_differences = {i: (sp2_coords[i] - sp3_coords[i]) for i in l_bridge_indexes}
-
-        self.r_bridge_differences = {i: (sp2_coords[i] - sp3_coords[i]) for i in r_bridge_indexes}
+        # Inicializar atributos que contendrán información calculada después de haber creado el objeto
+        self.transitions = None # Se inicializa el atributo que contendrá las coordenadas de cada transición
+        # self.left_cation = None
+        # self.right_cation = None
+        # self.left_bridge = None
+        # self.right_bridge = None
 
     def get_alignment_matrix(self, w_1, w_2):
         """
@@ -102,22 +75,7 @@ class TriCationicMolecule:
         ])
 
         return np.linalg.inv(np.array(a))
-
-    def generate_transitions(self, n_transitions):
-        """
-        Calculate the coordinates of each transition.
-
-        Args:
-            n_transitions (int): Number of transitions that will be calculated.
-        
-        Returns:
-            numpy array: A n_transitions x self.number_atoms x 3 array, each self.number_atoms x 3 array represents a transition.
-        """
-        self.transitions = np.zeros((n_transitions, self.number_atoms, 3))
-
-        for n in range(n_transitions):
-            self.transitions[n] = np.array(self.sp3) # Iniciar la transición con las coordenadas del estado sp3
-
+    
     def generate_gjf(self, n_transitions, template_file_path):
         """
         Generates a .gjf document for each list of atoms given.
