@@ -23,7 +23,7 @@ Almacenaremos las coordenadas de la molécula en cada estado en 2 nuevos documen
 
 Se debe notar que al transicionar del estado sp3 a sp2 se **pierden 4 átomos** de hidrogeno debido a la deformación del puente C<sub>2</sub>H<sub>6</sub>. Para poder correr este programa se tienen que **agregar estos 4 átomos a sp2-coordinates.txt**. Las coordenadas de los 4 átomos de hidrógeno quedarán sobrepuestas con las de los 4 átomos de carbono hacia los que se dirigen durante la transición. 
 
-En la molécula LI-7 las parejas de átomos que quedarán sobrepuestos son: (14, 11), (15, 19), (10,7) y (8, 17).
+En la molécula LI-7 las parejas de átomos que quedarán sobrepuestos son: (14, 11), (13, 19), (10,7) y (8, 17).
 
 <div align="center">
 
@@ -73,3 +73,4 @@ nombre/
 
 ## Licensia
 MIT LICENSE
+
