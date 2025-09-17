@@ -1,44 +1,56 @@
-from turtle import left
 import numpy as np
 import transitions.utilities as utils
 from transitions.molecule import Molecule, TriCationicMolecule
+import sqlite3
+import json
 
-# Datos necesarios para calcular las transiciones
-# Para más información sobre qué representan estos datos, consulta el archivo README.md
+def get_data(molecule_name):
+    """
+    Get the necessary data from the database to calculate the transitions of a specific molecule.
+    
+    Args:
+        molecule_name (str): Name of the molecule to be studied. It has to be the same as the folder name in the molecules directory.
 
-# Rutas de los archivos que contienen las coordenadas de los átomos de las moléculas
-molecule_name = "LI-7" # Editar este valor para cambiar la molécula a estudiar
-sp3_path = f"molecules/{molecule_name}/sp3-coordinates.txt"
-sp2_path = f"molecules/{molecule_name}/sp2-coordinates.txt"
-template_file_path = f"molecules/{molecule_name}/template.txt"
+    Returns:
+        dict: A dictionary containing the necessary data to calculate the transitions of the molecule.
+    """
+    conn = sqlite3.connect("database/molecules.db")
+    c = conn.cursor()
+    c.execute(f"SELECT * FROM molecules WHERE name='{molecule_name}'")
+    data = c.fetchone()
+    data = {
+        "name": data[0],
+        "origin_atom_index_sp3": data[1],
+        "central_atoms_indexes_sp3": json.loads(data[2]),
+        "origin_atom_index_sp2": data[3],
+        "central_atoms_indexes_sp2": json.loads(data[4]),
+        "left_cation_indexes": json.loads(data[5]),
+        "right_cation_indexes": json.loads(data[6])
+        }
 
-# Este es el átomo que se llevará a la coordenada [0, 0, 0]
-origin_atom_index_sp3 = 5 # Editar este valor para cambiar el átomo que se llevará al origen
-central_atoms_indexes_sp3 = [6, 15] # Editar este valor para cambiar los índices de los átomos centrales
-origin_atom_index_sp2 = 5
-central_atoms_indexes_sp2 = [6, 15]
+    conn.close()
+    return data
 
-# Índices de las partes de la molécula
-left_cation_indexes = [28, 29, 30, 31, 32, 33, 34, 36, 41, 42, 43, 44]
-right_cation_indexes = [21, 22, 23, 24, 25, 26, 27, 35, 37, 38, 39, 40]
-left_cation_origin_index = left_cation_indexes[0]
-right_cation_origin_index = right_cation_indexes[0]
-left_bridge_indexes = [11, 12, 13, 14, 19, 20]
-right_bridge_indexes = [7, 8, 9, 10, 17, 18]
-
-# Número de transiciones que se calcularán
-# Para más información sobre qué representa una transición, consulta el archivo README.md
-n_transitions = 4 # Editar este valor para cambiar el número de transiciones que se calcularán
-
-# Generar archivos .gjf
-gjf = True # Editar este valor para generar los archivos .gjf o no
-
-# --------------------------------------------------
-
-def get_transitions():
+def get_transitions(molecule_name, n_transitions):
     """
     Calculate the coordinates of each transition.
+
+    Args:
+        molecule_name (str): Name of the molecule to be studied. It has to be the same as the folder name in the molecules directory.
+        n_transitions (int): Number of transitions to be calculated.
+        gjf (bool): If True, .gjf files will be generated in the specified folder.
     """
+    # Obtener los datos necesarios para calcular las transiciones
+    data = get_data(molecule_name)
+    
+    # Rutas de los archivos que contienen las coordenadas de los átomos de las moléculas
+    sp3_path = f"molecules/{molecule_name}/sp3-coordinates.txt"
+    sp2_path = f"molecules/{molecule_name}/sp2-coordinates.txt"
+    template_file_path = f"molecules/{molecule_name}/template.txt"
+
+    left_cation_origin_index = data["left_cation_indexes"][0]
+    right_cation_origin_index = data["right_cation_indexes"][0]
+
     # ----------------------------------------------
     # Paso 1. Obtener coordenadas y alinear las moleculas
 
@@ -53,31 +65,27 @@ def get_transitions():
     sp3_molecule = TriCationicMolecule(
         name = molecule_name+"_sp3",
         atoms_dict = sp3_atoms_dict,
-        origin_atom_index = origin_atom_index_sp3,
-        central_atoms_indexes= central_atoms_indexes_sp3,
-        left_cation_indexes= left_cation_indexes,
-        right_cation_indexes= right_cation_indexes
+        origin_atom_index = data["origin_atom_index_sp3"],
+        central_atoms_indexes= data["central_atoms_indexes_sp3"],
+        left_cation_indexes= data["left_cation_indexes"],
+        right_cation_indexes= data["right_cation_indexes"]
     )
 
     sp2_molecule = TriCationicMolecule(
         name = molecule_name+"_sp2",
         atoms_dict = sp2_atoms_dict,
-        origin_atom_index = origin_atom_index_sp2,
-        central_atoms_indexes= central_atoms_indexes_sp2,
-        left_cation_indexes= left_cation_indexes,
-        right_cation_indexes= right_cation_indexes
+        origin_atom_index = data["origin_atom_index_sp2"],
+        central_atoms_indexes= data["central_atoms_indexes_sp2"],
+        left_cation_indexes= data["left_cation_indexes"],
+        right_cation_indexes= data["right_cation_indexes"]
     )
 
-    # sp3_molecule.left_bridge = {i:sp3_molecule.atoms[i] for i in left_bridge_indexes}
-    # sp3_molecule.right_bridge = {i:sp3_molecule.atoms[i] for i in right_bridge_indexes}
-
-    # Generar Transiciones
-    get_all_atoms = lambda x: np.array(list(x.atoms.values()))
     # Paso 2.- Obtener la diferencia entre las coordenadas de los átomos de la molécula sp3 y sp2
     diff_right_cation = sp2_molecule.right_cation - sp3_molecule.right_cation
     diff_left_cation = sp2_molecule.left_cation - sp3_molecule.left_cation
     diff_molecule = sp2_molecule - sp3_molecule
-    
+
+    # Generar Transiciones
     sp3_molecule.transitions = np.zeros((n_transitions, sp3_molecule.number_atoms, 3))
 
     # Paso 3. Calcular las coordenadas de cada transición
@@ -86,6 +94,7 @@ def get_transitions():
     #   - Tomar en cuenta los cambios de distancia de enlace que ocurren durante las transiciones.
     
     # Iterar para cada transición
+    # Se procesa cada catión por separado
     for n in range(1, n_transitions+1):
         # Iterar para cada átomo
         for i in sp3_molecule.atoms:
@@ -104,8 +113,7 @@ def get_transitions():
             elif i == right_cation_origin_index:
                 for j in sp3_molecule.right_cation.atoms.keys():
                     sp3_molecule.transitions[n-1][j-1] += diff_molecule[i] * n/(n_transitions)
-                sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))
+                sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))    
 
     # Paso 4. Generar archivos .gjf (opcional)
-    if gjf:
-        sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
+    sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
