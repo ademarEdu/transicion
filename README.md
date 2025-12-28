@@ -67,9 +67,24 @@ Además se debe agregar una carpeta llamada **gjf_files** donde se almacenarán 
 nombre/
 ├── gjf_files/
 ├── sp2-coordinates.txt
-├── sp2-coordinates.txt
+├── sp3-coordinates.txt
 └── template.txt
 ```
+
+Por último, se deben añadir datos importantes sobre la molécula a la base de datos ubicada en database/molecules.db. Para esto 
+
+## Base de datos
+Esta base de datos almacena información que el programa usará para generar las transiciones. La base de datos se encuentra en database/molecules.db y sus columnas son:
+
+   - **name** (TEXT): Nombre de la molécula. Debe coincidir con el nombre de la carpeta en molecules.
+   - **origin_atom_i_sp3** (INTEGER): Índice del átomo que se llevará a las coordenadas [0,0,0] en el estado sp3. 
+   - **central_atoms_i_sp3** (TEXT): índices de los 2 átomos w<sub>1</sub> y w<sub>2</sub>, los cuales se encuentran enla estructura pentagonal central de la molécula. Se puede ver más información sobre estos átomos en notebooks/**align_to_xy.ipynb**.
+   - **origin_atom_i_sp2** (INTEGER): Índice del átomo que se llevará a las coordenadas [0,0,0] en el estado sp2.
+   - **central_atoms_i_sp2** (TEXT): índices de los 2 átomos w<sub>1</sub> y w<sub>2</sub> en el estado sp2.
+   - **left_cation_i** (TEXT): índices de los átomos que conforman el catión izquierdo.
+   - **right_cation_i** (TEXT): índices de los átomos que conforman el catión derecho.
+   - **left_bridge_i** (TEXT): índices de los átomos que conforman el puente C<sub>2</sub>H<sub>6</sub> izquierdo.
+   - **right_bridge_i** (TEXT): índices de los átomos que conforman el puente C<sub>2</sub>H<sub>6</sub> derecho.
 
 ## Licensia
 MIT LICENSE
