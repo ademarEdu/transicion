@@ -71,7 +71,46 @@ nombre/
 └── template.txt
 ```
 
-Por último, se deben añadir datos importantes sobre la molécula a la base de datos ubicada en database/molecules.db. Para esto 
+Por último, se debe añadir la nueva molécula a la base de datos database/molecules.db. Para esto se debe agregar el siguiente código al archivo database/database.py reemplazando el código correspondiente antes de la línea ```c.execute("SELECT * FROM molecules")```:
+
+```
+# LI-7
+c_atoms_i_sp3 = json.dumps([6, 15])
+c_atoms_i_sp2 = json.dumps([6, 15])
+l_cation_i = json.dumps([28, 29, 30, 31, 32, 33, 34, 36, 41, 42, 43, 44])
+r_cation_i = json.dumps([21, 22, 23, 24, 25, 26, 27, 35, 37, 38, 39, 40])
+l_bridge_i = json.dumps([11, 12, 13, 14, 19, 20])
+r_bridge_i = json.dumps([7, 8, 9, 10, 17, 18])
+c.execute("""INSERT INTO molecules VALUES ('LI-7', 5, ?, 5, ?, ?, ?, ?, ?)""", (c_atoms_i_sp3, c_atoms_i_sp2, l_cation_i, r_cation_i, l_bridge_i, r_bridge_i))
+```
+
+Este código añade añande una nueva fila a la tabla molecules con los datos de la moléucla LI-7. A continución se explica cada línea del código:
+
+1. ```c_atoms_i_sp3 = json.dumps([6, 15])```: la función **json.dumps()** convierte una lista de python a una cadena de texto en formato JSON. En este caso, los índices 6 y 15 corresponden a los átomos w<sub>1</sub> y w<sub>2</sub> en el estado sp3.
+
+<div align="center">
+<img src="images\readme\img8.png" alt="Mi imagen" width="300"/>
+</div>
+
+2. ```c_atoms_i_sp2 = json.dumps([6, 15])```: similar a la línea anterior, pero para el estado sp2.
+
+3. ```l_cation_i = json.dumps([28, 29, 30, 31, 32, 33, 34, 36, 41, 42, 43, 44])```: Contiene los índices de los átomos que conforman el catión izquierdo de la molécula LI-7.
+
+<div align="center">
+<img src="images\readme\img9.png" alt="Mi imagen" width="300"/>
+</div>
+
+4. ```r_cation_i = json.dumps([21, 22, 23, 24, 25, 26, 27, 35, 37, 38, 39, 40])```: Contiene los índices de los átomos que conforman el catión derecho de la molécula LI-7.
+
+5. ```l_bridge_i = json.dumps([11, 12, 13, 14, 19, 20])```: Contiene los índices de los átomos que conforman el puente C<sub>2</sub>H<sub>6</sub> izquierdo de la molécula LI-7.
+
+<div align="center">
+<img src="images\readme\img10.png" alt="Mi imagen" width="300"/>
+</div>
+
+6. ```r_bridge_i = json.dumps([7, 8, 9, 10, 17, 18])```: Contiene los índices de los átomos que conforman el puente C<sub>2</sub>H<sub>6</sub> derecho de la molécula LI-7.
+
+7. ```c.execute("""INSERT INTO molecules VALUES ('LI-7', 5, ?, 5, ?, ?, ?, ?, ?)""", (c_atoms_i_sp3, c_atoms_i_sp2, l_cation_i, r_cation_i, l_bridge_i, r_bridge_i))```: esta línea inserta una nueva fila en la tabla molecules con los datos de la molécula LI-7. Los 3 valores: LI-7, 5 y 5 corresponden al nombre de la molécula, el átomo central en sp3 y átomo central sp2; los signos de interrogación (?) son marcadores de posición que serán reemplazados por los valores proporcionados en la tupla al final de la línea.
 
 ## Base de datos
 Esta base de datos almacena información que el programa usará para generar las transiciones. La base de datos se encuentra en database/molecules.db y sus columnas son:
