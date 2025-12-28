@@ -1,0 +1,12 @@
+%nprocshared=4
+%mem=512MB
+#p b3lyp/6-31g polar=(dcshg,cubic) cphf=rdfreq
+
+Title Card Required
+
+3 1
+
+
+0.0828424  0.0723227  0.05695416  0.0536039  0.042812964  0.0347811  0.0293956  
+
+
