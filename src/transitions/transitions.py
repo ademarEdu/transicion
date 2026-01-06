@@ -117,5 +117,5 @@ def get_transitions(molecule_name, n_transitions):
     #                 sp3_molecule.transitions[n-1][j-1] += diff_molecule[i] * n/(n_transitions)
     #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))    
 
-    # # Paso 4. Generar archivos .gjf (opcional)
-    #sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
+    # Paso 4. Generar archivos .gjf (opcional)
+    sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
