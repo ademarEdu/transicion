@@ -9,4 +9,4 @@ if __name__ == "__main__":
         import cli.cli as cli
         cli.run_cli()
     else:
-        transitions.get_transitions("LI-7-B-D-F1", n_transitions=4)
+        transitions.get_transitions("LI-7-B-D-F", n_transitions=4)

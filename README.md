@@ -33,7 +33,17 @@ En la molécula LI-7 las parejas de átomos que quedarán sobrepuestos son: (14,
 
 </div>
 
-Por úlimo se debe agregar el documento **template.txt** a la carpeta molecules\\**nombre**, el cual debe tener la siguiente estructura:
+A continuación debemos asegurarnos que los átomos tienen el mismo índice en ambos estados. Por ejemplo, el átomo con índice 1 en sp3 debe corresponder al mismo átomo con índice 1 en sp2. Si los índices no corresponden, se añaden los 4 átomos de hidrógeno sobrepuestos a los 4 de carbono en cualquier lugar y se usa el script **molecules/sort_atoms.py** para reordenar los átomos en sp2.
+
+<div align="center">
+
+| Documento en sp3 | Documento en sp2 |
+| ------------ | ------------ |
+| <img src="images\readme\img12.png" alt="Mi imagen" width="300"/> | <img src="images\readme\img11.png" alt="Mi imagen" width="300"/> |
+
+</div>
+
+Después se debe agregar el documento **template.txt** a la carpeta molecules\\**nombre**, el cual debe tener la siguiente estructura:
 
 ```
 %nprocshared=4

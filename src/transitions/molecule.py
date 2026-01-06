@@ -136,6 +136,9 @@ class Molecule:
     def show_gjf(self, header_file):
         """
         Shows a temporary .gjf file of the molecule with GaussView.
+
+        Args:
+            header_file (str): Path of the header file to be used in the .gjf file. Tipically "molecules/header.txt".
         """
         gaussview_path = "C:/Users/dell/Desktop/GaussView_6.0.16+Win64/GaussView_6.0.16_win64/gview.exe"
         # Generar el archivo temporal .gjf
