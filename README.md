@@ -43,7 +43,7 @@ A continuación debemos asegurarnos que los átomos tienen el mismo índice en a
 
 </div>
 
-Después se debe agregar el documento **template.txt** a la carpeta molecules\\**nombre**, el cual debe tener la siguiente estructura:
+Después se debe agregar el documento **template.txt** a la carpeta molecules\\**nombre** corriendo el script **molecules/generate_template.py**. El documento debe tener la siguiente estructura:
 
 ```
 %nprocshared=4
