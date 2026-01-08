@@ -263,23 +263,42 @@ class TriCationicMolecule(Molecule):
 
         return np.linalg.inv(np.array(a))
     
-    def build_molecule(self, left_cation, right_cation, central_cation, left_bridge, right_bridge):
+    def build_molecule(self, left_cation, right_cation, left_bridge, right_bridge):
         """
-        Returns a TriCationicMolecule containing the specified parts.
+        Returns a Molecule containing the specified parts of a TriCationicMolecule. The new molecule will always contain the central cation.
 
         Args:
             left_cation (bool): Indicates if the left cation of the molecule is included.
             right_cation (bool): Indicates if the right cation of the molecule is included.
-            central_cation (bool): Indicates if the central cation of the molecule is included.
             left_bridge (bool): Indicates if the left bridge of the molecule is included.
             right_bridge (bool): Indicates if the right bridge of the molecule is included.
         """
-        # # Mover los cationes a su posición original
-        # left_cation.back_to_original()
-        # right_cation.back_to_original()
-        # central_cation.back_to_original()
-        # left_bridge.back_to_original()
-        # right_bridge.back_to_original()
+        # Crear máquina de estados
+        states = bin(left_cation*8 + right_cation*4 + left_bridge*2 + right_bridge*1)
 
-        # # Unir los átomos de las partes en un solo diccionario
-        # self.atoms = {**left_cation.atoms, **right_cation.atoms, **central_cation.atoms, **left_bridge.atoms, **right_bridge.atoms}
+        if states == '0b0':
+            raise ValueError("At least one part of the molecule must be included to build a new Molecule.")
+        if states == '0b1111':
+            raise ValueError("To build a new Molecule, at least one part must be excluded.")
+
+        # Mover los cationes a su posición original
+        self.central_cation.back_to_original()
+        self.left_cation.back_to_original()
+        self.right_cation.back_to_original()
+        self.left_bridge.back_to_original()
+        self.right_bridge.back_to_original()
+
+        # Crear la nueva molécula con las partes especificadas
+        new_mol = Molecule(
+            name = self.name+"_partial",
+            atoms_dict = {
+                **(self.central_cation.atoms),
+                **(self.left_cation.atoms if left_cation else {}),
+                **(self.right_cation.atoms if right_cation else {}),
+                **(self.left_bridge.atoms if left_bridge else {}),
+                **(self.right_bridge.atoms if right_bridge else {})
+            },
+            origin_atom_index = self.origin_atom_index
+        )
+
+        return new_mol

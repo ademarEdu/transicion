@@ -76,18 +76,50 @@ def get_transitions(molecule_name, n_transitions):
         right_bridge_indexes= data["right_bridge_indexes"]
     )
 
+    # Ejemplo de cómo mostrar o guardar un archivo .gjf
     # sp2_molecule.show_gjf(header_file)
-    # sp3_molecule.save_gjf(header_file, f"molecules/{molecule_name}/gjf_files/trial.gjf")
+    # sp2_molecule.save_gjf(header_file, f"molecules/{molecule_name}/gjf_files/trial.gjf")
 
+    # # Ejemplo de cómo ver los componentes de una molécula tricatiónica
+    # sp3_molecule.left_cation.back_to_original()
+    # sp3_molecule.left_cation.show_gjf(header_file)
+    # sp3_molecule.right_cation.show_gjf(header_file)
+    # sp3_molecule.central_cation.show_gjf(header_file)
+    # sp3_molecule.right_bridge.show_gjf(header_file)
     # sp3_molecule.left_bridge.show_gjf(header_file)
-    # sp2_molecule.left_bridge.show_gjf(header_file)
+
+    # Ejemplo de cómo generar una nueva molécula a partir de las partes de una molécula tricatiónica
+    new_sp3_molecule = sp3_molecule.build_molecule(
+        left_cation=False,
+        right_cation=False,
+        left_bridge=True,
+        right_bridge=True
+    )
+
+    new_sp3_molecule.show_gjf(header_file)
+
+    new_sp2_molecule = sp2_molecule.build_molecule(
+        left_cation=False,
+        right_cation=False,
+        left_bridge=True,
+        right_bridge=True
+    )
+
+    new_sp2_molecule.show_gjf(header_file)
 
     # Generar transiciones
-    diff_molecule = sp2_molecule - sp3_molecule
+    diff_molecule = new_sp2_molecule - new_sp3_molecule
     diff_molecule /= n_transitions
     for i in range(1, n_transitions+1):
-        sp3_molecule += diff_molecule
-        sp3_molecule.show_gjf(header_file)
+        new_sp3_molecule += diff_molecule
+        new_sp3_molecule.show_gjf(header_file)
+
+    # # Generar transiciones
+    # diff_molecule = sp2_molecule - sp3_molecule
+    # diff_molecule /= n_transitions
+    # for i in range(1, n_transitions+1):
+    #     sp3_molecule += diff_molecule
+    #     sp3_molecule.show_gjf(header_file)
 
     # Generar Transiciones
     # Paso 3. Calcular las coordenadas de cada transición
@@ -117,5 +149,5 @@ def get_transitions(molecule_name, n_transitions):
     #                 sp3_molecule.transitions[n-1][j-1] += diff_molecule[i] * n/(n_transitions)
     #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))    
 
-    # # Paso 4. Generar archivos .gjf (opcional)
-    # sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
+    # Paso 4. Generar archivos .gjf (opcional)
+    sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
