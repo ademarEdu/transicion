@@ -3,6 +3,7 @@ import math
 import tempfile
 import subprocess
 import os
+import copy
 
 sqrd = lambda x : x*x
 magnitude = lambda x : math.sqrt(sqrd(x[0]) + sqrd(x[1]) + sqrd(x[2]))
@@ -29,8 +30,14 @@ class Atom:
     def __mul__(self, scalar):
         return Atom(self.name, self.coordinates * scalar)
 
+    def __rmul__(self, scalar):
+        return Atom(self.name, self.coordinates * scalar)
+
     def __truediv__(self, scalar):
         return Atom(self.name, self.coordinates / scalar)
+    
+    def magnitude(self):
+        return magnitude(self.coordinates)
 
 class Molecule:
     """
@@ -242,6 +249,64 @@ class TriCationicMolecule(Molecule):
             origin_atom_index = central_atoms_indexes[0]
         )
 
+    def __copy__(self):
+        """
+        Creates a deep copy of the TriCationicMolecule. This function uses the copy module to ensure that all nested objects are also copied.
+        """
+        return copy.deepcopy(self)
+
+    def __sub__(self, other):
+        """
+        Subtracts the coordinates of two TriCationicMolecules.
+
+        Args:
+            other (TriCationicMolecule): The molecule to be subtracted from self.
+        """
+        if self.number_atoms != other.number_atoms:
+            raise ValueError("Both molecules must have the same number of atoms to perform subtraction.")
+        diff = self.__copy__()
+        for i in self.atoms:
+            diff.atoms[i] -= other.atoms[i]
+        return diff
+    
+    def __add__(self, other):
+        """
+        Adds the coordinates of two TriCationicMolecules.
+
+        Args:
+            other (TriCationicMolecule): The molecule to be added to self.
+        """
+        if self.number_atoms != other.number_atoms:
+            raise ValueError("Both molecules must have the same number of atoms to perform addition.")
+        add = self.__copy__()
+        for i in add.atoms:
+            add.atoms[i] += other.atoms[i]
+        return add
+
+    def __mul__(self, scalar):
+        """
+        Multiplies the coordinates of the TriCationicMolecule by a scalar.
+
+        Args:
+            scalar (float): The scalar to multiply the coordinates by.
+        """
+        mult = self.__copy__()
+        for i in self.atoms:
+            mult.atoms[i] *= scalar
+        return mult
+
+    def __truediv__(self, scalar):
+        """
+        Divides the coordinates of the TriCationicMolecule by a scalar.
+
+        Args:
+            scalar (float): The scalar to divide the coordinates by.
+        """
+        div = self.__copy__()
+        for i in self.atoms:
+            div.atoms[i] /= scalar
+        return div
+
     def get_alignment_matrix(self, w_1, w_2):
         """
         Finds the matrix A that aligns the central vectors of the molecule to the xy-plane.
@@ -302,3 +367,6 @@ class TriCationicMolecule(Molecule):
         )
 
         return new_mol
+
+    def adjust_bridge_lengths(self):
+        pass

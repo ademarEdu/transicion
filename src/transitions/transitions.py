@@ -76,6 +76,8 @@ def get_transitions(molecule_name, n_transitions):
         right_bridge_indexes= data["right_bridge_indexes"]
     )
 
+    # Ejemplos del uso de algunos métodos de la clase Molecule y TriCationicMolecule
+
     # Ejemplo de cómo mostrar o guardar un archivo .gjf
     # sp2_molecule.show_gjf(header_file)
     # sp2_molecule.save_gjf(header_file, f"molecules/{molecule_name}/gjf_files/trial.gjf")
@@ -88,38 +90,82 @@ def get_transitions(molecule_name, n_transitions):
     # sp3_molecule.right_bridge.show_gjf(header_file)
     # sp3_molecule.left_bridge.show_gjf(header_file)
 
-    # Ejemplo de cómo generar una nueva molécula a partir de las partes de una molécula tricatiónica
-    new_sp3_molecule = sp3_molecule.build_molecule(
-        left_cation=False,
-        right_cation=False,
-        left_bridge=True,
-        right_bridge=True
-    )
+    # # Ejemplo de cómo generar una nueva molécula a partir de las partes de una molécula tricatiónica
+    # new_sp3_molecule = sp3_molecule.build_molecule(
+    #     left_cation=False,
+    #     right_cation=False,
+    #     left_bridge=True,
+    #     right_bridge=True
+    # )
 
-    new_sp3_molecule.show_gjf(header_file)
+    # --------------------------------------
 
-    new_sp2_molecule = sp2_molecule.build_molecule(
-        left_cation=False,
-        right_cation=False,
-        left_bridge=True,
-        right_bridge=True
-    )
-
-    new_sp2_molecule.show_gjf(header_file)
-
-    # Generar transiciones
-    diff_molecule = new_sp2_molecule - new_sp3_molecule
-    diff_molecule /= n_transitions
-    for i in range(1, n_transitions+1):
-        new_sp3_molecule += diff_molecule
-        new_sp3_molecule.show_gjf(header_file)
+    # new_sp3_molecule.show_gjf(header_file)
 
     # # Generar transiciones
-    # diff_molecule = sp2_molecule - sp3_molecule
+    # diff_molecule = new_sp2_molecule - new_sp3_molecule
     # diff_molecule /= n_transitions
     # for i in range(1, n_transitions+1):
-    #     sp3_molecule += diff_molecule
-    #     sp3_molecule.show_gjf(header_file)
+    #     new_sp3_molecule += diff_molecule
+    #     new_sp3_molecule.show_gjf(header_file)
+
+    # Generar transiciones
+
+    diff_molecule = sp2_molecule - sp3_molecule
+    diff_molecule /= n_transitions
+    # Prueba: Ajustar longitudes de enlace de los puentes C2H6
+    indexes_dict = {
+        'c': (7, 17), # Recordatorio: Editar estos índices para generalizar la función
+        'a': (9, 18),
+        'b': (8, 10)
+    }
+
+    # Calcular datos necesarios para ajustar longitudes de enlace
+    right_bridge_data = {}
+
+    for i in indexes_dict:
+        if i == 'c':
+            v1 = sp3_molecule.atoms[indexes_dict['c'][1]] - sp3_molecule.atoms[indexes_dict['c'][0]]
+            r = v1.magnitude()
+            r_prime = (sp2_molecule.atoms[indexes_dict['c'][1]] - sp2_molecule.atoms[indexes_dict['c'][0]]).magnitude()
+            delta_r = (r_prime - r)/n_transitions
+            right_bridge_data[i] = {
+                'v1': v1,
+                'r': r,
+                'r_prime': r_prime,
+                'delta_r': delta_r
+            }
+        else:
+            v1 = sp3_molecule.atoms[indexes_dict[i][0]] - sp3_molecule.atoms[indexes_dict['c'][0]]
+            r = v1.magnitude()
+            r_prime = (sp2_molecule.atoms[indexes_dict[i][0]] - sp2_molecule.atoms[indexes_dict['c'][0]]).magnitude()
+            delta_r = (r_prime - r)/n_transitions
+            right_bridge_data[i] = {
+                'v1': v1,
+                'r': r,
+                'r_prime': r_prime,
+                'delta_r': delta_r
+            }
+
+    # v1 = sp3_molecule.atoms[9] - sp3_molecule.atoms[7]
+    # r = v1.magnitude()
+    # r_prime = (sp2_molecule.atoms[9] - sp2_molecule.atoms[7]).magnitude()
+    # delta_r = (r_prime - r)/n_transitions
+
+    for n in range(1, n_transitions+1):
+        sp3_molecule += diff_molecule
+        new_sp3_molecule = sp3_molecule.__copy__()
+        for i in right_bridge_data:
+            if i == 'c':
+                v2 = new_sp3_molecule.atoms[indexes_dict['c'][1]] - new_sp3_molecule.atoms[indexes_dict['c'][0]]
+                v3 = ((right_bridge_data['c']['r'] - v2.magnitude() + right_bridge_data['c']['delta_r'] * n ) / v2.magnitude()) * v2
+                new_sp3_molecule.atoms[indexes_dict['c'][1]] += v3
+            else:
+                v2 = new_sp3_molecule.atoms[indexes_dict[i][0]] - new_sp3_molecule.atoms[indexes_dict['c'][0]]
+                v3 = ((right_bridge_data[i]['r'] - v2.magnitude() + right_bridge_data[i]['delta_r'] * n ) / v2.magnitude()) * v2
+                new_sp3_molecule.atoms[indexes_dict[i][0]] += v3
+                new_sp3_molecule.atoms[indexes_dict[i][1]] = (-1)*(new_sp3_molecule.atoms[indexes_dict[i][0]]) + new_sp3_molecule.atoms[indexes_dict['c'][1]] + new_sp3_molecule.atoms[indexes_dict['c'][0]]
+        new_sp3_molecule.show_gjf(header_file)
 
     # Generar Transiciones
     # Paso 3. Calcular las coordenadas de cada transición
@@ -149,5 +195,5 @@ def get_transitions(molecule_name, n_transitions):
     #                 sp3_molecule.transitions[n-1][j-1] += diff_molecule[i] * n/(n_transitions)
     #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))    
 
-    # Paso 4. Generar archivos .gjf (opcional)
-    sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
+    # # Paso 4. Generar archivos .gjf (opcional)
+    # sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
