@@ -27,7 +27,9 @@ def get_data(molecule_name):
         "left_cation_indexes": json.loads(data[5]),
         "right_cation_indexes": json.loads(data[6]),
         "left_bridge_indexes": json.loads(data[7]),
-        "right_bridge_indexes": json.loads(data[8])
+        "right_bridge_indexes": json.loads(data[8]),
+        "left_bridge_correspondance": json.loads(data[9]),
+        "right_bridge_correspondance": json.loads(data[10])
         }
 
     conn.close()
@@ -100,100 +102,59 @@ def get_transitions(molecule_name, n_transitions):
 
     # --------------------------------------
 
-    # new_sp3_molecule.show_gjf(header_file)
-
-    # # Generar transiciones
-    # diff_molecule = new_sp2_molecule - new_sp3_molecule
-    # diff_molecule /= n_transitions
-    # for i in range(1, n_transitions+1):
-    #     new_sp3_molecule += diff_molecule
-    #     new_sp3_molecule.show_gjf(header_file)
-
     # Generar transiciones
-
     diff_molecule = sp2_molecule - sp3_molecule
     diff_molecule /= n_transitions
-    # Prueba: Ajustar longitudes de enlace de los puentes C2H6
-    indexes_dict = {
-        'c': (7, 17), # Recordatorio: Editar estos índices para generalizar la función
-        'a': (9, 18),
-        'b': (8, 10)
-    }
 
     # Calcular datos necesarios para ajustar longitudes de enlace
-    right_bridge_data = {}
+    indexes_dictionaries = [data["left_bridge_correspondance"], data["right_bridge_correspondance"]]
+    bridges_data = {'left': {}, 'right': {}}
 
-    for i in indexes_dict:
-        if i == 'c':
-            v1 = sp3_molecule.atoms[indexes_dict['c'][1]] - sp3_molecule.atoms[indexes_dict['c'][0]]
-            r = v1.magnitude()
-            r_prime = (sp2_molecule.atoms[indexes_dict['c'][1]] - sp2_molecule.atoms[indexes_dict['c'][0]]).magnitude()
-            delta_r = (r_prime - r)/n_transitions
-            right_bridge_data[i] = {
-                'v1': v1,
-                'r': r,
-                'r_prime': r_prime,
-                'delta_r': delta_r
-            }
-        else:
-            v1 = sp3_molecule.atoms[indexes_dict[i][0]] - sp3_molecule.atoms[indexes_dict['c'][0]]
-            r = v1.magnitude()
-            r_prime = (sp2_molecule.atoms[indexes_dict[i][0]] - sp2_molecule.atoms[indexes_dict['c'][0]]).magnitude()
-            delta_r = (r_prime - r)/n_transitions
-            right_bridge_data[i] = {
-                'v1': v1,
-                'r': r,
-                'r_prime': r_prime,
-                'delta_r': delta_r
-            }
+    # c: el átomo de carbono del puente
+    # a: el átomo de hidrógeno que se quedará al transicionar a sp2
+    # b: el átomo de hidrógeno que se moverá para dejar espacio al doble enlace
 
-    # v1 = sp3_molecule.atoms[9] - sp3_molecule.atoms[7]
-    # r = v1.magnitude()
-    # r_prime = (sp2_molecule.atoms[9] - sp2_molecule.atoms[7]).magnitude()
-    # delta_r = (r_prime - r)/n_transitions
+    for i in ['c', 'a', 'b']:
+        for indexes_dict, side in zip(indexes_dictionaries, ['left', 'right']):
+            if i == 'c':
+                v1 = sp3_molecule.atoms[indexes_dict['c'][1]] - sp3_molecule.atoms[indexes_dict['c'][0]]
+                r = v1.magnitude()
+                r_prime = (sp2_molecule.atoms[indexes_dict['c'][1]] - sp2_molecule.atoms[indexes_dict['c'][0]]).magnitude()
+                delta_r = (r_prime - r)/n_transitions
+                bridges_data[side][i] = {
+                    'v1': v1,
+                    'r': r,
+                    'r_prime': r_prime,
+                    'delta_r': delta_r
+                }
+            else:
+                v1 = sp3_molecule.atoms[indexes_dict[i][0]] - sp3_molecule.atoms[indexes_dict['c'][0]]
+                r = v1.magnitude()
+                r_prime = (sp2_molecule.atoms[indexes_dict[i][0]] - sp2_molecule.atoms[indexes_dict['c'][0]]).magnitude()
+                delta_r = (r_prime - r)/n_transitions
+                bridges_data[side][i] = {
+                    'v1': v1,
+                    'r': r,
+                    'r_prime': r_prime,
+                    'delta_r': delta_r
+                }
 
+    # Generar cada transición ajustando las longitudes de enlace
     for n in range(1, n_transitions+1):
         sp3_molecule += diff_molecule
         new_sp3_molecule = sp3_molecule.__copy__()
-        for i in right_bridge_data:
-            if i == 'c':
-                v2 = new_sp3_molecule.atoms[indexes_dict['c'][1]] - new_sp3_molecule.atoms[indexes_dict['c'][0]]
-                v3 = ((right_bridge_data['c']['r'] - v2.magnitude() + right_bridge_data['c']['delta_r'] * n ) / v2.magnitude()) * v2
-                new_sp3_molecule.atoms[indexes_dict['c'][1]] += v3
-            else:
-                v2 = new_sp3_molecule.atoms[indexes_dict[i][0]] - new_sp3_molecule.atoms[indexes_dict['c'][0]]
-                v3 = ((right_bridge_data[i]['r'] - v2.magnitude() + right_bridge_data[i]['delta_r'] * n ) / v2.magnitude()) * v2
-                new_sp3_molecule.atoms[indexes_dict[i][0]] += v3
-                new_sp3_molecule.atoms[indexes_dict[i][1]] = (-1)*(new_sp3_molecule.atoms[indexes_dict[i][0]]) + new_sp3_molecule.atoms[indexes_dict['c'][1]] + new_sp3_molecule.atoms[indexes_dict['c'][0]]
+        for i in ['c', 'a', 'b']:
+            for side, indexes_dict in zip(['left', 'right'], indexes_dictionaries):
+                if i == 'c':
+                    v2 = new_sp3_molecule.atoms[indexes_dict['c'][1]] - new_sp3_molecule.atoms[indexes_dict['c'][0]]
+                    v3 = ((bridges_data[side]['c']['r'] - v2.magnitude() + bridges_data[side]['c']['delta_r'] * n ) / v2.magnitude()) * v2
+                    new_sp3_molecule.atoms[indexes_dict['c'][1]] += v3
+                else:
+                    v2 = new_sp3_molecule.atoms[indexes_dict[i][0]] - new_sp3_molecule.atoms[indexes_dict['c'][0]]
+                    v3 = ((bridges_data[side][i]['r'] - v2.magnitude() + bridges_data[side][i]['delta_r'] * n ) / v2.magnitude()) * v2
+                    new_sp3_molecule.atoms[indexes_dict[i][0]] += v3
+                    new_sp3_molecule.atoms[indexes_dict[i][1]] = (-1)*(new_sp3_molecule.atoms[indexes_dict[i][0]]) + new_sp3_molecule.atoms[indexes_dict['c'][1]] + new_sp3_molecule.atoms[indexes_dict['c'][0]]
         new_sp3_molecule.show_gjf(header_file)
-
-    # Generar Transiciones
-    # Paso 3. Calcular las coordenadas de cada transición
-    # El objetivo de todos los algoritmos debe de ser:
-    #   - Hacer los cambios de ángulo en cada transición sumando difvecatomslist a las coordenadas de los átomos de la molécula sp3.
-    #   - Tomar en cuenta los cambios de distancia de enlace que ocurren durante las transiciones.
-    
-    # # Iterar para cada transición
-    # # Se procesa cada catión por separado
-    # for n in range(1, n_transitions+1):
-    #     # Iterar para cada átomo
-    #     for i in sp3_molecule.atoms:
-    #         if i in sp3_molecule.left_cation.atoms.keys():
-    #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_left_cation[i] * n/(n_transitions))
-    #         elif i in sp3_molecule.right_cation.atoms.keys():
-    #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_right_cation[i] * n/(n_transitions))
-    #         else:
-    #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))
-    #     # Pegar los cationes a su átomo origen transicionando
-    #     for i in [left_cation_origin_index, right_cation_origin_index]:    
-    #         if i == left_cation_origin_index:
-    #             for j in sp3_molecule.left_cation.atoms.keys():
-    #                 sp3_molecule.transitions[n-1][j-1] += diff_molecule[i] * n/(n_transitions)
-    #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))
-    #         elif i == right_cation_origin_index:
-    #             for j in sp3_molecule.right_cation.atoms.keys():
-    #                 sp3_molecule.transitions[n-1][j-1] += diff_molecule[i] * n/(n_transitions)
-    #             sp3_molecule.transitions[n-1][i-1] = sp3_molecule.atoms[i] + (diff_molecule[i] * n/(n_transitions))    
 
     # # Paso 4. Generar archivos .gjf (opcional)
     # sp3_molecule.generate_gjf(n_transitions, template_file_path, f"molecules/{molecule_name}/gjf_files")
