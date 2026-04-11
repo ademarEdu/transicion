@@ -160,6 +160,10 @@ class Molecule:
     def save_gjf(self, header_file, new_file_path):
         """
         Saves a .gjf file of the molecule in the specified directory.
+
+        Args:
+            header_file (str): Path of the header file to be used in the .gjf file. Tipically "molecules/header.txt".
+            new_file_path (str): The path to the file to be created including its name. Example: "C:/path_to_directory/directory/1transition.gjf"
         """
         # Generar el archivo .gjf
         with open(f"{new_file_path}", "w") as gjf_file:

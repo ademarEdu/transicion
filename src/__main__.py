@@ -1,4 +1,4 @@
-import transitions.transitions as transitions
+import transitions.transitions as trs
 
 if __name__ == "__main__":
     # El valor de esta variable puede se cambiada para correr el programa sin usar la CLI
@@ -9,4 +9,5 @@ if __name__ == "__main__":
         import cli.cli as cli
         cli.run_cli()
     else:
-        transitions.get_transitions("LI-7", n_transitions=4)
+        generator = trs.Transitions("LI-7")
+        generator.gen_transitions(2)
