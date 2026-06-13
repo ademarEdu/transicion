@@ -147,7 +147,7 @@ class Molecule:
         Args:
             header_file (str): Path of the header file to be used in the .gjf file. Tipically "molecules/header.txt".
         """
-        gaussview_path = "C:/Users/dell/Desktop/GaussView_6.0.16+Win64/GaussView_6.0.16_win64/gview.exe"
+        gaussview_path = "C:/Users/viole/OneDrive - Secretaría de Educación de Guanajuato/Documentos/ADEMARDOCS/g16w/gview.exe"
         # Generar el archivo temporal .gjf
         with tempfile.NamedTemporaryFile(mode="w+", suffix=".gjf", delete=False) as temp_file:
             temp_file.writelines(self.gjf_file_content(header_file))

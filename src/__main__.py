@@ -10,4 +10,4 @@ if __name__ == "__main__":
         cli.run_cli()
     else:
         generator = trs.Transitions("LI-7")
-        generator.gen_transitions(2)
+        generator.gen_transitions(4)    

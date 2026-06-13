@@ -205,6 +205,25 @@ class Transitions:
         """
         # Mostrar la molécula en su estado sp3
         self.sp3_molecule.show_gjf(self.header_file)
+        
+        # sp3_l = self.sp3_molecule.left_cation
+        # sp2_l = self.sp2_molecule.left_cation
+
+        # a = sp3_l.atoms[21]
+        # for atom in sp3_l.atoms:
+        #     sp3_l.atoms[atom] = sp3_l.atoms[atom] - a
+        # b = sp2_l.atoms[21]
+        # for atom in sp2_l.atoms:
+        #     sp2_l.atoms[atom] = sp2_l.atoms[atom] - b
+
+        # sp3_l.show_gjf(self.header_file)
+        # sp2_l.show_gjf(self.header_file)
+
+        # # Distance between
+        # print((sp2_l.atoms[19]/sp2_l.atoms[19].magnitude()).magnitude())
+        # print((sp3_l.atoms[19]/sp3_l.atoms[19].magnitude()).magnitude())
+        # diff = (sp2_l.atoms[19]/sp2_l.atoms[19].magnitude()) - (sp3_l.atoms[19]/sp3_l.atoms[19].magnitude())
+        # print(diff.magnitude())
 
         # Generar los datos necesarios para la transición
         self.n = n_transitions
