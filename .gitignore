@@ -1,5 +1,5 @@
 __pycache__/
 venv/*
 molecules/*/gjf_files/*
-notebooks/*
+notebooks/*.ipynb
 src/cli/*
